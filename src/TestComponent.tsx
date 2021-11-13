@@ -11,7 +11,6 @@ const TestComponent = () => {
   useEffect(() => {}, []);
 
   const getNewData = async () => {
-    console.log("뭐지");
     const { data } = await fakeInfiniteFetch();
 
     setFeeds((prev) => [...prev, ...data]);
@@ -19,7 +18,7 @@ const TestComponent = () => {
 
   return (
     <InfiniteScroll getNewData={getNewData} column={3}>
-      {feeds.map((feed) => (
+      {feeds.map((feed, index) => (
         <Feed feed={feed} />
       ))}
     </InfiniteScroll>

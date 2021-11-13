@@ -1,20 +1,15 @@
-import React, { ReactNode, useRef } from "react";
+import React, { ReactNode } from "react";
+import ActualDOM from "./components/ActualDOM/ActualDOM";
 import useIntersectionObserver from "./hooks/useIntersectionObserver";
-import { EndElement, Row } from "./InfiniteScroll.styles";
-import { getDividedElementsByColumn } from "./util/common";
+import useVDOM from "./hooks/useVDOM";
+import { EndElement } from "./InfiniteScroll.styles";
 
 interface Props {
-  children: ReactNode;
+  children: ReactNode[];
   getNewData: () => void;
   column: number;
   className?: string;
 }
-
-const isArrayLike = (
-  arrayLike: ReactNode
-): arrayLike is ArrayLike<ReactNode> => {
-  return (arrayLike as any)?.length === undefined ? false : true;
-};
 
 const InfiniteScroll = ({
   children = [],
@@ -23,18 +18,14 @@ const InfiniteScroll = ({
   className,
 }: Props) => {
   const endElementRef = useIntersectionObserver(getNewData);
-
-  if (!isArrayLike(children)) {
-    return null;
-  }
-
-  const rows = getDividedElementsByColumn<ReactNode>(children, column);
+  // TODO: VDOM context API로 만들기
+  const vDOM = useVDOM({ column });
 
   return (
     <div className={className}>
-      {rows.map((row) => {
-        return <Row>{row}</Row>;
-      })}
+      <ActualDOM column={column} vDOM={vDOM}>
+        {children}
+      </ActualDOM>
 
       <EndElement ref={endElementRef}></EndElement>
     </div>
