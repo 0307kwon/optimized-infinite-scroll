@@ -4,7 +4,7 @@ interface NetworkResponse {
   data: FeedType[];
 }
 
-const FEEDS_COUNT_PER_REQUEST = 20;
+const FEEDS_COUNT_PER_REQUEST = 40;
 
 const getRandomInteger = (min: number, max: number) => {
   return min + Math.round(Math.random() * (max - min));

@@ -18,9 +18,10 @@ const Element = ({ vDOM, vDOMKey, children }: Props) => {
     const rect = ref.current.getBoundingClientRect();
 
     vDOM.registerVirtualElement(vDOMKey, {
-      element: children,
+      id: vDOMKey,
+      actualReactNode: children,
       heightPx: rect.height,
-      yPositionPx: rect.y,
+      yPositionPx: ref.current.offsetTop,
     });
   }, [ref]);
 

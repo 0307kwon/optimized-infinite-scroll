@@ -2,9 +2,7 @@ export const getDividedElementsByColumn = <T>(
   target: ArrayLike<T>,
   column: number
 ) => {
-  // console.log(target);
-
-  return [...Array(1 + Math.floor(target.length / column))].map((_, row) => {
+  return [...Array(Math.ceil(target.length / column))].map((_, row) => {
     return [...Array(column)]
       .map((_, col) => {
         const index = row * column + col;

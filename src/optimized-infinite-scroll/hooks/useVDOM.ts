@@ -5,7 +5,8 @@ import {
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 
 interface VirtualElement {
-  element: ReactNode;
+  id: number;
+  actualReactNode: ReactNode;
   heightPx: number;
   yPositionPx: number;
 }
@@ -13,13 +14,14 @@ interface VirtualElement {
 type SetVDOM = (elementIndex: number, virtualElement: VirtualElement) => void;
 
 export interface VDOMInterface {
+  virtualElements: (VirtualElement | null)[];
   registerVirtualElement: SetVDOM;
 }
 
 interface Row {
   yPositionPx: number;
   HeightPx: number;
-  elements: VirtualElement[];
+  virtualElements: VirtualElement[];
 }
 
 interface Params {
@@ -29,8 +31,8 @@ interface Params {
 const useVDOM = ({ column }: Params): VDOMInterface => {
   const cachedAllElements = useRef<VirtualElement[]>([]);
   const cachedAllElementsRows = useRef<Row[]>([]);
-  const VDOMRef = useRef<VirtualElement[]>([]);
-  const [VDOM, setVDOM] = useState<VirtualElement[]>([]);
+  const vDOMRef = useRef<(VirtualElement | null)[]>([]);
+  const [vDOM, setVDOM] = useState<(VirtualElement | null)[]>([]);
 
   useEffect(() => {
     window.addEventListener("scroll", () => {
@@ -40,27 +42,39 @@ const useVDOM = ({ column }: Params): VDOMInterface => {
       );
 
       cachedAllElementsRows.current = rows.map((elements) => ({
-        elements,
+        virtualElements: elements,
         yPositionPx: elements[0].yPositionPx,
         HeightPx: Math.max(...elements.map((element) => element.heightPx)),
       }));
 
-      const afterVDOM = cachedAllElementsRows.current
+      const afterVDOM = new Array(cachedAllElements.current.length).fill(null);
+
+      const elementsInViewPort = cachedAllElementsRows.current
         .filter((rows) => isRowInViewPort(rows))
-        .map((row) => row.elements)
+        .map((row) => row.virtualElements)
         .flat();
 
-      if (isSameArray(VDOMRef.current, afterVDOM)) {
+      elementsInViewPort.forEach((element) => {
+        afterVDOM[element.id] = element;
+      });
+
+      if (isSameArray(vDOMRef.current, afterVDOM)) {
         return;
       }
 
-      VDOMRef.current = afterVDOM;
-      setVDOM(VDOMRef.current);
+      vDOMRef.current = afterVDOM;
+
+      setVDOM(vDOMRef.current);
     });
   }, []);
 
   return {
+    virtualElements: vDOM,
     registerVirtualElement: (vDOMKey, virtualElement) => {
+      if (cachedAllElements.current[vDOMKey]) {
+        return;
+      }
+
       cachedAllElements.current[vDOMKey] = virtualElement;
     },
   };
