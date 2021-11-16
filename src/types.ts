@@ -3,3 +3,5 @@ export interface FeedType {
   imageURL: string;
   contents: string;
 }
+
+export type GetNewData = () => Promise<unknown>;
