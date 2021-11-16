@@ -15,7 +15,6 @@ const ActualDOM = ({ children, column, vDOM }: Props) => {
     null
   );
   const [blankHeightPx, setBlankHeightPx] = useState(0);
-  const [temp, setTemp] = useState([]);
 
   const mountAdditionalElements = (children: ReactNode[]) => {
     if (children.length === 0) {
@@ -56,6 +55,7 @@ const ActualDOM = ({ children, column, vDOM }: Props) => {
     );
 
     if (firstElementInViewPort) {
+      // TODO: requestAnimationFrame으로 순서 강제하기
       setBlankHeightPx(firstElementInViewPort.yPositionPx);
       setRenderingRows(rows);
     }

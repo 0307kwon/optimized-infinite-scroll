@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState } from "react";
 import ActualDOM from "./components/ActualDOM/ActualDOM";
 import useIntersectionObserver from "./hooks/useIntersectionObserver";
 import useVDOM from "./hooks/useVDOM";
@@ -6,7 +6,7 @@ import { EndElement, RootDiv } from "./InfiniteScroll.styles";
 
 interface Props {
   children: ReactNode[];
-  getNewData: () => void;
+  getNewData: () => Promise<unknown>;
   column: number;
   className?: string;
 }
@@ -19,13 +19,16 @@ const InfiniteScroll = ({
 }: Props) => {
   // TODO: VDOM context API로 만들기
   const vDOM = useVDOM({ column });
-  const endElementRef = useIntersectionObserver(() => {
+  const [isDataLoading, setIsDataLoading] = useState(false);
+  const endElementRef = useIntersectionObserver(async () => {
     const isEndElementInViewPort =
       vDOM.virtualElements[vDOM.virtualElements.length - 1] ||
       vDOM.virtualElements.length === 0;
 
-    if (isEndElementInViewPort) {
-      getNewData();
+    if (isEndElementInViewPort && !isDataLoading) {
+      setIsDataLoading(true);
+      await getNewData();
+      setIsDataLoading(false);
     }
   });
 

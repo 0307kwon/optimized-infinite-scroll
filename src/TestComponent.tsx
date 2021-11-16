@@ -8,8 +8,6 @@ import Feed from "./components/Feed";
 const TestComponent = () => {
   const [feeds, setFeeds] = useState<FeedType[]>([]);
 
-  useEffect(() => {}, []);
-
   const getNewData = async () => {
     const { data } = await fakeInfiniteFetch();
 
