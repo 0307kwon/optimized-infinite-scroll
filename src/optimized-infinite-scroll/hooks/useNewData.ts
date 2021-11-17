@@ -16,10 +16,10 @@ const useNewData = ({ vDOM, children, renderingRows }: Params) => {
       return [];
     }
 
-    const nextElementIndex = vDOM.virtualElements.length;
+    const nextElementIndex = vDOM.vElementsInViewPort.length;
     const additionalChildren = children.slice(nextElementIndex);
 
-    const actualElements = vDOM.virtualElements.map(
+    const actualElements = vDOM.vElementsInViewPort.map(
       (virtualElement) => virtualElement?.actualReactNode
     );
 

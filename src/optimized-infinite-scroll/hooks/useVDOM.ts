@@ -13,43 +13,46 @@ interface VirtualElement {
 
 type SetVDOM = (elementIndex: number, virtualElement: VirtualElement) => void;
 
-export interface VDOMInterface {
-  virtualElements: (VirtualElement | null)[];
-  registerVirtualElement: SetVDOM;
-}
-
 interface Row {
+  virtualElements: VirtualElement[];
   yPositionPx: number;
   HeightPx: number;
-  virtualElements: VirtualElement[];
 }
 
 interface Params {
   column: number;
 }
 
+export interface VDOMInterface {
+  vElements: VirtualElement[];
+  vElementsInViewPort: (VirtualElement | null)[];
+  registerVirtualElement: SetVDOM;
+}
+
 const useVDOM = ({ column }: Params): VDOMInterface => {
-  const cachedAllElements = useRef<VirtualElement[]>([]);
-  const cachedAllElementsRows = useRef<Row[]>([]);
-  const vDOMRef = useRef<(VirtualElement | null)[]>([]);
-  const [vDOM, setVDOM] = useState<(VirtualElement | null)[]>([]);
+  const vElementsRef = useRef<VirtualElement[]>([]);
+  const [vElements, setVElements] = useState<VirtualElement[]>([]);
+
+  const vElementsRowsRef = useRef<Row[]>([]);
+
+  const vElementsInViewPortRef = useRef<(VirtualElement | null)[]>([]);
+  const [vElementsInViewPort, setVElementsInViewPort] = useState<
+    (VirtualElement | null)[]
+  >([]);
 
   useEffect(() => {
     window.addEventListener("scroll", () => {
-      const rows = getDividedElementsByColumn(
-        cachedAllElements.current,
-        column
-      );
+      const rows = getDividedElementsByColumn(vElementsRef.current, column);
 
-      cachedAllElementsRows.current = rows.map((elements) => ({
+      vElementsRowsRef.current = rows.map((elements) => ({
         virtualElements: elements,
         yPositionPx: elements[0].yPositionPx,
         HeightPx: Math.max(...elements.map((element) => element.heightPx)),
       }));
 
-      const afterVDOM = new Array(cachedAllElements.current.length).fill(null);
+      const afterVDOM = new Array(vElementsRef.current.length).fill(null);
 
-      const elementsInViewPort = cachedAllElementsRows.current
+      const elementsInViewPort = vElementsRowsRef.current
         .filter((rows) => isRowInViewPort(rows))
         .map((row) => row.virtualElements)
         .flat();
@@ -58,24 +61,25 @@ const useVDOM = ({ column }: Params): VDOMInterface => {
         afterVDOM[element.id] = element;
       });
 
-      if (isSameArray(vDOMRef.current, afterVDOM)) {
+      if (isSameArray(vElementsInViewPortRef.current, afterVDOM)) {
         return;
       }
 
-      vDOMRef.current = afterVDOM;
+      vElementsInViewPortRef.current = afterVDOM;
 
-      setVDOM(vDOMRef.current);
+      setVElementsInViewPort(vElementsInViewPortRef.current);
     });
   }, []);
 
   return {
-    virtualElements: vDOM,
+    vElements: vElementsRef.current,
+    vElementsInViewPort,
     registerVirtualElement: (vDOMKey, virtualElement) => {
-      if (cachedAllElements.current[vDOMKey]) {
+      if (vElementsRef.current[vDOMKey]) {
         return;
       }
 
-      cachedAllElements.current[vDOMKey] = virtualElement;
+      vElementsRef.current[vDOMKey] = virtualElement;
     },
   };
 };

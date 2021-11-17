@@ -11,16 +11,16 @@ const useDataInViewPortOnly = ({ vDOM }: Params) => {
   >(null);
 
   useEffect(() => {
-    if (vDOM.virtualElements.length === 0) {
+    if (vDOM.vElementsInViewPort.length === 0) {
       return;
     }
 
-    const elements = vDOM.virtualElements.map(
+    const elements = vDOM.vElementsInViewPort.map(
       (virtualElement) => virtualElement?.actualReactNode
     );
 
     setDataInViewPort(elements);
-  }, [vDOM.virtualElements]);
+  }, [vDOM.vElementsInViewPort]);
 
   return {
     dataInViewPort,

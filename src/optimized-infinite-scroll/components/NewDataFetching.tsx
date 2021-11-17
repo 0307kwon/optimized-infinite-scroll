@@ -15,8 +15,8 @@ const NewDataFetching = ({ vDOM, getNewData }: Props) => {
 
   const endElementRef = useIntersectionObserver(async () => {
     const isEndElementInViewPort =
-      vDOM.virtualElements[vDOM.virtualElements.length - 1] ||
-      vDOM.virtualElements.length === 0;
+      vDOM.vElementsInViewPort[vDOM.vElementsInViewPort.length - 1] ||
+      vDOM.vElementsInViewPort.length === 0;
 
     if (isEndElementInViewPort && !isDataFetching) {
       setIsDataFetching(true);

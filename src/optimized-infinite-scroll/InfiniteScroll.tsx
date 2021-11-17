@@ -7,6 +7,7 @@ import useNewData from "./hooks/useNewData";
 import useVDOM from "./hooks/useVDOM";
 import { Blank, RootDiv, Row } from "./InfiniteScroll.styles";
 import { getDividedElementsByColumn } from "./util/common";
+import "./prototypes.js";
 
 interface Props {
   children: ReactNode[];
@@ -22,28 +23,60 @@ const InfiniteScroll = ({
   className,
 }: Props) => {
   // TODO: VDOM context API로 만들기
-  const vDOM = useVDOM({ column });
   const [renderingRows, setRenderingRows] = useState<ReactNode[][] | null>(
     null
   );
-  const [blankHeightPx, setBlankHeightPx] = useState(0);
-  const { newData } = useNewData({ vDOM, children, renderingRows });
+  const [overallHeightPx, setOverallHeightPx] = useState(0);
+  const [blankHeightPx, setBlankHeightPx] = useState<{
+    top: number;
+    bottom: number;
+  }>({
+    top: 0,
+    bottom: 0,
+  });
+  const vDOM = useVDOM({ column });
+  const { newData, isNewDataMounting } = useNewData({
+    vDOM,
+    children,
+    renderingRows,
+  });
   const { dataInViewPort } = useDataInViewPortOnly({ vDOM });
+
+  useEffect(() => {
+    if (!isNewDataMounting) {
+      // overallHeight 구하기
+      // B만 구하면 됨
+
+      const lastElementInVElement = vDOM.vElements.findLast(
+        (element) => element
+      );
+
+      if (lastElementInVElement) {
+        setOverallHeightPx(lastElementInVElement.yPositionPx);
+      }
+    }
+  }, [isNewDataMounting]);
 
   useEffect(() => {
     if (!dataInViewPort) {
       return;
     }
 
-    const firstElementInViewPort = vDOM.virtualElements.find(
+    const firstElementInViewPort = vDOM.vElementsInViewPort.find(
+      (element) => element
+    );
+    const lastElementInViewPort = vDOM.vElementsInViewPort.findLast(
       (element) => element
     );
 
-    if (firstElementInViewPort) {
+    if (firstElementInViewPort && lastElementInViewPort) {
       const rows = getDividedElementsByColumn(dataInViewPort, column);
 
       setRenderingRows(rows);
-      setBlankHeightPx(firstElementInViewPort.yPositionPx);
+      setBlankHeightPx({
+        top: firstElementInViewPort.yPositionPx,
+        bottom: overallHeightPx - lastElementInViewPort.yPositionPx,
+      });
     }
   }, [dataInViewPort]);
 
@@ -57,7 +90,7 @@ const InfiniteScroll = ({
 
   return (
     <RootDiv className={className}>
-      <Blank blankHeightPx={blankHeightPx} />
+      <Blank blankHeightPx={blankHeightPx.top} />
       {renderingRows &&
         renderingRows.map((row, rowIndex) => {
           return (
@@ -78,6 +111,7 @@ const InfiniteScroll = ({
             )
           );
         })}
+      <Blank blankHeightPx={blankHeightPx.bottom} />
 
       <NewDataFetching getNewData={getNewData} vDOM={vDOM} />
     </RootDiv>
