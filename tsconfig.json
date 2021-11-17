@@ -13,5 +13,5 @@
     "esModuleInterop": true,
     "types": ["react/next", "react-dom/next", "@emotion/react/types/css-prop"]
   },
-  "includes": ["src"]
+  "includes": ["src", "global.d.ts"]
 }
