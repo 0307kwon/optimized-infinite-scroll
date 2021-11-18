@@ -5,9 +5,9 @@ import NewDataFetching from "./components/NewDataFetching";
 import useDataInViewPortOnly from "./hooks/useDataInViewPortOnly";
 import useNewData from "./hooks/useNewData";
 import useVDOM from "./hooks/useVDOM";
-import { Blank, RootDiv, Row } from "./InfiniteScroll.styles";
-import { getDividedElementsByColumn } from "./util/common";
+import { Blank, ElementContainer, RootDiv } from "./InfiniteScroll.styles";
 import "./prototypes.js";
+import { getDividedElementsByColumn } from "./util/common";
 
 interface Props {
   children: ReactNode[];
@@ -23,9 +23,9 @@ const InfiniteScroll = ({
   className,
 }: Props) => {
   // TODO: VDOM context API로 만들기
-  const [renderingRows, setRenderingRows] = useState<ReactNode[][] | null>(
-    null
-  );
+  const [renderingElements, setRenderingElements] = useState<
+    ReactNode[] | null
+  >(null);
   const [overallHeightPx, setOverallHeightPx] = useState(0);
   const [blankHeightPx, setBlankHeightPx] = useState<{
     top: number;
@@ -35,12 +35,12 @@ const InfiniteScroll = ({
     bottom: 0,
   });
   const vDOM = useVDOM({ column });
+  const { dataInViewPort } = useDataInViewPortOnly({ vDOM });
   const { newData, isNewDataMounting } = useNewData({
     vDOM,
     children,
-    renderingRows,
+    renderingElements,
   });
-  const { dataInViewPort } = useDataInViewPortOnly({ vDOM });
 
   useEffect(() => {
     if (!isNewDataMounting) {
@@ -70,9 +70,7 @@ const InfiniteScroll = ({
     );
 
     if (firstElementInViewPort && lastElementInViewPort) {
-      const rows = getDividedElementsByColumn(dataInViewPort, column);
-
-      setRenderingRows(rows);
+      setRenderingElements(dataInViewPort);
       setBlankHeightPx({
         top: firstElementInViewPort.yPositionPx,
         bottom: overallHeightPx - lastElementInViewPort.yPositionPx,
@@ -82,35 +80,25 @@ const InfiniteScroll = ({
 
   useEffect(() => {
     if (newData) {
-      const rows = getDividedElementsByColumn(newData, column);
-
-      setRenderingRows(rows);
+      setRenderingElements(newData);
     }
   }, [newData]);
 
   return (
     <RootDiv className={className}>
       <Blank blankHeightPx={blankHeightPx.top} />
-      {renderingRows &&
-        renderingRows.map((row, rowIndex) => {
-          return (
-            row.length !== 0 && (
-              <Row>
-                {row.map(
-                  (element, colIndex) =>
-                    element && (
-                      <Element
-                        vDOM={vDOM}
-                        vDOMKey={column * rowIndex + colIndex}
-                      >
-                        {element}
-                      </Element>
-                    )
-                )}
-              </Row>
-            )
-          );
-        })}
+      <ElementContainer>
+        {renderingElements &&
+          renderingElements.map((element, index) => {
+            return (
+              element && (
+                <Element vDOM={vDOM} vDOMKey={index}>
+                  {element}
+                </Element>
+              )
+            );
+          })}
+      </ElementContainer>
       <Blank blankHeightPx={blankHeightPx.bottom} />
 
       <NewDataFetching getNewData={getNewData} vDOM={vDOM} />

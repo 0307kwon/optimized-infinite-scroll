@@ -4,10 +4,10 @@ import React, { ReactNode, useEffect, useState } from "react";
 interface Params {
   vDOM: VDOMInterface;
   children: ReactNode[];
-  renderingRows: React.ReactNode[][] | null;
+  renderingElements: ReactNode[] | null;
 }
 
-const useNewData = ({ vDOM, children, renderingRows }: Params) => {
+const useNewData = ({ vDOM, children, renderingElements }: Params) => {
   const [newData, setNewData] = useState<ReactNode[] | null>(null);
   const [isNewDataMounting, setNewDataMounting] = useState(false);
 
@@ -40,7 +40,7 @@ const useNewData = ({ vDOM, children, renderingRows }: Params) => {
     if (isNewDataMounting) {
       setNewDataMounting(false);
     }
-  }, [isNewDataMounting, renderingRows]);
+  }, [isNewDataMounting, renderingElements]);
 
   return {
     newData,

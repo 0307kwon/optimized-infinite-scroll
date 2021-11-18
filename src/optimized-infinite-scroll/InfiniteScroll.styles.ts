@@ -4,8 +4,10 @@ export const RootDiv = styled.div`
   position: relative;
 `;
 
-export const Row = styled.div`
-  display: flex;
+export const ElementContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
 `;
 
 export const Blank = styled.div<{ blankHeightPx: number }>`

@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import { VDOMInterface } from "optimized-infinite-scroll/hooks/useVDOM";
 import React, { ReactNode, useEffect, useRef } from "react";
 
@@ -25,7 +26,12 @@ const Element = ({ vDOM, vDOMKey, children }: Props) => {
     });
   }, [ref]);
 
-  return <div ref={ref}>{children}</div>;
+  return <RootDiv ref={ref}>{children}</RootDiv>;
 };
+
+const RootDiv = styled.div`
+  display: flex;
+  justify-content: center;
+`;
 
 export default Element;
