@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import useIntersectionObserver from "optimized-infinite-scroll/hooks/useIntersectionObserver";
-import { VDOMInterface } from "optimized-infinite-scroll/hooks/useVDOM";
+import { VDOMInterface } from "optimized-infinite-scroll/hooks/useVDOM/useVDOM";
 import { getDividedElementsByColumn } from "optimized-infinite-scroll/util/common";
 import React, { ReactNode, useEffect, useState } from "react";
 import { GetNewData } from "types";
@@ -23,7 +23,7 @@ const NewDataFetching = ({ vDOM, getNewData }: Props) => {
       await getNewData();
       setIsDataFetching(false);
     }
-  });
+  }, [vDOM.vElementsInViewPort]);
 
   return <EndElement ref={endElementRef}></EndElement>;
 };

@@ -45,9 +45,6 @@ const InfiniteScroll = ({
 
   useEffect(() => {
     if (!isNewDataMounting) {
-      // overallHeight 구하기
-      // B만 구하면 됨
-
       const lastElementInVElement = vDOM.vElements.findLast(
         (element) => element
       );

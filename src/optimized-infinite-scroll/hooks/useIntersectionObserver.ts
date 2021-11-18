@@ -1,6 +1,9 @@
-import { useEffect, useRef } from "react";
+import { DependencyList, useEffect, useRef } from "react";
 
-const useIntersectionObserver = (callback: () => void) => {
+const useIntersectionObserver = (
+  callback: () => void,
+  dep: DependencyList = []
+) => {
   const targetElementRef = useRef(null);
   const freshCallback = useRef(callback);
 
@@ -27,7 +30,7 @@ const useIntersectionObserver = (callback: () => void) => {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, dep);
 
   return targetElementRef;
 };

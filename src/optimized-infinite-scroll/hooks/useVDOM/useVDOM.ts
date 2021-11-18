@@ -3,6 +3,7 @@ import {
   isSameArray,
 } from "optimized-infinite-scroll/util/common";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import useDebounce from "../useDebounce";
 import useScrollOffset from "./useScrollOffset";
 
 interface VirtualElement {
@@ -33,6 +34,7 @@ export interface VDOMInterface {
 
 const useVDOM = ({ column, rootContainerRef }: Params): VDOMInterface => {
   const scrollOffsetRef = useScrollOffset({ rootContainerRef });
+  const { setDebounceCallback } = useDebounce({ delay: 200 });
 
   const vElementsRef = useRef<VirtualElement[]>([]);
 
@@ -60,34 +62,46 @@ const useVDOM = ({ column, rootContainerRef }: Params): VDOMInterface => {
     return isTopInViewPort || isBottomInViewPort;
   };
 
+  const getVElementsInViewPort = () => {
+    const rows = getDividedElementsByColumn(vElementsRef.current, column);
+
+    vElementsRowsRef.current = rows.map((elements) => ({
+      virtualElements: elements,
+      yPositionPx: elements[0].yPositionPx,
+      HeightPx: Math.max(...elements.map((element) => element.heightPx)),
+    }));
+
+    const vElementsInViewPort = new Array(vElementsRef.current.length).fill(
+      null
+    );
+
+    const elementsInViewPort = vElementsRowsRef.current
+      .filter((rows) => isRowInViewPort(rows))
+      .map((row) => row.virtualElements)
+      .flat();
+
+    elementsInViewPort.forEach((element) => {
+      vElementsInViewPort[element.id] = element;
+    });
+
+    return vElementsInViewPort;
+  };
+
   useEffect(() => {
     window.addEventListener("scroll", () => {
-      const rows = getDividedElementsByColumn(vElementsRef.current, column);
+      setDebounceCallback(() => {
+        const afterVElementsInViewPort = getVElementsInViewPort();
 
-      vElementsRowsRef.current = rows.map((elements) => ({
-        virtualElements: elements,
-        yPositionPx: elements[0].yPositionPx,
-        HeightPx: Math.max(...elements.map((element) => element.heightPx)),
-      }));
+        if (
+          isSameArray(vElementsInViewPortRef.current, afterVElementsInViewPort)
+        ) {
+          return;
+        }
 
-      const afterVDOM = new Array(vElementsRef.current.length).fill(null);
+        vElementsInViewPortRef.current = afterVElementsInViewPort;
 
-      const elementsInViewPort = vElementsRowsRef.current
-        .filter((rows) => isRowInViewPort(rows))
-        .map((row) => row.virtualElements)
-        .flat();
-
-      elementsInViewPort.forEach((element) => {
-        afterVDOM[element.id] = element;
+        setVElementsInViewPort(vElementsInViewPortRef.current);
       });
-
-      if (isSameArray(vElementsInViewPortRef.current, afterVDOM)) {
-        return;
-      }
-
-      vElementsInViewPortRef.current = afterVDOM;
-
-      setVElementsInViewPort(vElementsInViewPortRef.current);
     });
   }, []);
 

@@ -11,7 +11,7 @@ export const ElementContainer = styled.div`
 `;
 
 export const Blank = styled.div<{ blankHeightPx: number }>`
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0);
   width: 100%;
   height: ${({ blankHeightPx }) => `${blankHeightPx}px`};
 `;
