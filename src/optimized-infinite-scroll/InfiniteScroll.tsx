@@ -52,7 +52,9 @@ const InfiniteScroll = ({
       );
 
       if (lastElementInVElement) {
-        setOverallHeightPx(lastElementInVElement.yPositionPx);
+        setOverallHeightPx(
+          lastElementInVElement.yPositionPx + lastElementInVElement.heightPx
+        );
       }
     }
   }, [isNewDataMounting]);
@@ -73,7 +75,10 @@ const InfiniteScroll = ({
       setRenderingElements(dataInViewPort);
       setBlankHeightPx({
         top: firstElementInViewPort.yPositionPx,
-        bottom: overallHeightPx - lastElementInViewPort.yPositionPx,
+        bottom:
+          overallHeightPx -
+          lastElementInViewPort.yPositionPx -
+          lastElementInViewPort.heightPx,
       });
     }
   }, [dataInViewPort]);
