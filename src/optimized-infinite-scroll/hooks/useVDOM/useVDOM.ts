@@ -2,7 +2,8 @@ import {
   getDividedElementsByColumn,
   isSameArray,
 } from "optimized-infinite-scroll/util/common";
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import useScrollOffset from "./useScrollOffset";
 
 interface VirtualElement {
   id: number;
@@ -20,6 +21,7 @@ interface Row {
 }
 
 interface Params {
+  rootContainerRef: React.RefObject<HTMLDivElement>;
   column: number;
 }
 
@@ -29,9 +31,10 @@ export interface VDOMInterface {
   registerVirtualElement: SetVDOM;
 }
 
-const useVDOM = ({ column }: Params): VDOMInterface => {
+const useVDOM = ({ column, rootContainerRef }: Params): VDOMInterface => {
+  const scrollOffsetRef = useScrollOffset({ rootContainerRef });
+
   const vElementsRef = useRef<VirtualElement[]>([]);
-  const [vElements, setVElements] = useState<VirtualElement[]>([]);
 
   const vElementsRowsRef = useRef<Row[]>([]);
 
@@ -39,6 +42,23 @@ const useVDOM = ({ column }: Params): VDOMInterface => {
   const [vElementsInViewPort, setVElementsInViewPort] = useState<
     (VirtualElement | null)[]
   >([]);
+
+  const isRowInViewPort = (row: Row) => {
+    const scrollY =
+      window.scrollY - scrollOffsetRef.current > 0
+        ? window.scrollY - scrollOffsetRef.current
+        : 0;
+
+    const isTopInViewPort =
+      row.yPositionPx > scrollY &&
+      row.yPositionPx < scrollY + window.innerHeight;
+
+    const isBottomInViewPort =
+      row.yPositionPx + row.HeightPx > scrollY &&
+      row.yPositionPx + row.HeightPx < scrollY + window.innerHeight;
+
+    return isTopInViewPort || isBottomInViewPort;
+  };
 
   useEffect(() => {
     window.addEventListener("scroll", () => {
@@ -82,18 +102,6 @@ const useVDOM = ({ column }: Params): VDOMInterface => {
       vElementsRef.current[vDOMKey] = virtualElement;
     },
   };
-};
-
-const isRowInViewPort = (row: Row) => {
-  const isBottomInViewPort =
-    row.yPositionPx + row.HeightPx > window.scrollY &&
-    row.yPositionPx + row.HeightPx < window.scrollY + window.innerHeight;
-
-  const isTopInViewPort =
-    row.yPositionPx > window.scrollY &&
-    row.yPositionPx < window.scrollY + window.innerHeight;
-
-  return isBottomInViewPort || isTopInViewPort;
 };
 
 export default useVDOM;

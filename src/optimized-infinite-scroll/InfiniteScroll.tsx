@@ -1,10 +1,10 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { GetNewData } from "types";
 import Element from "./components/Element";
 import NewDataFetching from "./components/NewDataFetching";
 import useDataInViewPortOnly from "./hooks/useDataInViewPortOnly";
 import useNewData from "./hooks/useNewData";
-import useVDOM from "./hooks/useVDOM";
+import useVDOM from "./hooks/useVDOM/useVDOM";
 import { Blank, ElementContainer, RootDiv } from "./InfiniteScroll.styles";
 import "./prototypes.js";
 import { getDividedElementsByColumn } from "./util/common";
@@ -34,7 +34,8 @@ const InfiniteScroll = ({
     top: 0,
     bottom: 0,
   });
-  const vDOM = useVDOM({ column });
+  const rootContainerRef = useRef<HTMLDivElement>(null);
+  const vDOM = useVDOM({ column, rootContainerRef });
   const { dataInViewPort } = useDataInViewPortOnly({ vDOM });
   const { newData, isNewDataMounting } = useNewData({
     vDOM,
@@ -90,7 +91,7 @@ const InfiniteScroll = ({
   }, [newData]);
 
   return (
-    <RootDiv className={className}>
+    <RootDiv ref={rootContainerRef} className={className}>
       <Blank blankHeightPx={blankHeightPx.top} />
       <ElementContainer>
         {renderingElements &&

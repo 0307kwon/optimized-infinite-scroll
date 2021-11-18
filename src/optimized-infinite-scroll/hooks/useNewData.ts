@@ -1,4 +1,4 @@
-import { VDOMInterface } from "optimized-infinite-scroll/hooks/useVDOM";
+import { VDOMInterface } from "optimized-infinite-scroll/hooks/useVDOM/useVDOM";
 import React, { ReactNode, useEffect, useState } from "react";
 
 interface Params {
